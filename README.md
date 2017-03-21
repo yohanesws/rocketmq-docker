@@ -11,11 +11,13 @@ docker build -t yohanesws/rocketmq:latest -f Dockerfile.rocketmq .
 docker run -dP --rm yohanesws/rocketmq
 
 ##Technical Specification
+
 expose >9876/tcp
 
 $JAVA_OPT --> for namesrv java Memory Setting
 $BROKER_OPT --> for broker java Memory Setting
 
 ##For Prototype only not intent for production use
+
 [RocketMQ Official Docker][https://issues.apache.org/jira/browse/ROCKETMQ-48]
 [JMS Support][https://github.com/apache/incubator-rocketmq-externals]

@@ -23,3 +23,13 @@ $BROKER_OPT --> for broker java Memory Setting
 [RocketMQ Official Docker][https://issues.apache.org/jira/browse/ROCKETMQ-48]
 
 [JMS Support][https://github.com/apache/incubator-rocketmq-externals]
+
+## Build to openshift
+
+### first approach : build directly to openshift
+oc create -f https://raw.githubusercontent.com/yohanesws/rocketmq-docker/master/openshift-bc.json
+
+### second approach : build from local
+oc new-build --binary --name=rocketmq-docker
+
+oc start-build approach2 --from-dir=.

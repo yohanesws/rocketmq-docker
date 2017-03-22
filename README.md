@@ -32,4 +32,4 @@ oc create -f https://raw.githubusercontent.com/yohanesws/rocketmq-docker/master/
 ### second approach : build from local
 oc new-build --binary --name=rocketmq-docker
 
-oc start-build approach2 --from-dir=.
+oc start-build rocketmq-docker --from-dir=.

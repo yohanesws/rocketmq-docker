@@ -1,0 +1,89 @@
+{
+   "kind": "List",
+   "apiVersion": "v1",
+   "metadata": {
+      "name": "rocketmq"
+   },
+   "items": [
+      {
+        "kind": "BuildConfig",
+        "apiVersion": "v1",
+        "metadata":{
+          "name": "rocketmq"
+        },
+        "spec": {
+          "triggers": [
+             {
+                "type": "GitHub",
+                "github": {
+                   "secret": "secret101"
+                }
+             },
+             {
+                "type": "ImageChange",
+                "imageChange": {}
+             }
+          ],
+          "source" : {
+            "type" : "Git",
+            "git" : {
+              "uri": "git://github.com/yohanesws/rocketmq-docker.git"
+            },
+            "contextDir": "/"
+          },
+          "strategy": {
+            "type": "Docker",
+            "dockerStrategy": {
+              "env": [
+                {
+                  "name": "IMAGE_NAME",
+                  "value": "openshift/rocketmq"
+                }],
+              "from": {
+                 "kind": "ImageStreamTag",
+                 "name": "openjdk18-openshift:latest"
+              }
+            }
+          },
+          "output": {
+            "to": {
+              "kind": "ImageStreamTag",
+              "name": "rocketmq:latest"
+            }
+          }
+        }
+      },
+    {
+       "kind": "ImageStream",
+       "apiVersion": "v1",
+       "metadata": {
+          "name": "openjdk18-openshift"
+       },
+       "spec": {
+          "dockerImageRepository": "registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift"
+       }
+    },
+    {
+      "kind": "ImageStream",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "rocketmq"
+      },
+      "spec": {
+          "dockerImageRepository": "",
+          "tags": [
+             {
+                "name": "latest",
+                "annotations": {
+                   "description": "RocketMQ Base Image",
+                   "iconClass": "icon-jboss",
+                   "tags": "rocketmq,mq,prototype",
+                   "supports": "java:8,maven:3,rocketmq:4-incubation",
+                   "version": "1.0"
+                }
+             }
+          ]
+       }
+    }
+  ]
+}

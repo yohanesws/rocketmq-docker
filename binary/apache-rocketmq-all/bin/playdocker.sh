@@ -14,13 +14,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-echo $JAVA_OPT
-echo $BROKER_OPT
-export
-# if [ -z $JAVA_OPT -a -z $BROKER_OPT]; then
-# 			echo >&2 '  You need to specify one of Java Memory in JAVA_OPT for namesrv Java OPT or BROKER_OPT for broker java OPT'
-# 			exit 1
-# fi
+
+if [ -z "$JAVA_OPT" -a -z "$BROKER_OPT"]; then
+			echo >&2 '  You need to specify one of Java Memory in JAVA_OPT for namesrv Java OPT or BROKER_OPT for broker java OPT'
+			exit 1
+fi
 
 #
 # Name Server
@@ -30,7 +28,7 @@ nohup sh ${ROCKETMQ_HOME}/bin/mqnamesrvdocker &
 #
 # Service Addr
 #
-export ROCKETMQ_NAMESERVER=${HOSTNAME}:9876
+export ROCKETMQ_NAMESERVER=localhost:9876
 unset JAVA_OPT
 export JAVA_OPT=${BROKER_OPT}
 

@@ -20,7 +20,7 @@
 # 			exit 1
 # fi
 
-if [ -z $ROCKETMQ_HOME ] ; then
+if [ -z "$ROCKETMQ_HOME" ] ; then
   ## resolve links - $0 may be a link to maven's home
   PRG="$0"
 

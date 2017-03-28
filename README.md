@@ -30,7 +30,7 @@ Always do it from openshift project
 Need create softlink based on Dockerfile that want to build
 
 Example:
-
+rm Dockerfile
 ln -s Dockerfile.rocketmq Dockerfile
 
 

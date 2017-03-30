@@ -1,0 +1,340 @@
+{
+  "apiVersion": "v1",
+  "kind": "Template",
+  "metadata": {
+    "annotations": {
+      "description": "RocketMQ Simple Container",
+      "tags": "rocketmq,nameserver,broker,apache",
+      "iconClass": "icon-jboss",
+      "version": "1.0"
+    },
+    "name": "rocketmq-scale"
+  },
+  "labels": {
+    "template": "rocketmq-scale"
+  },
+  "parameters": [
+    {
+      "name": "NAMESERVER",
+      "displayName": "Nameserver Application Name",
+      "required": true,
+      "value": "rocketmq-nameserver",
+      "description": "The name assigned to the application."
+    },
+      {
+        "name": "BROKER",
+        "displayName": "Broker Application Name",
+        "required": true,
+        "value": "rocketmq-broker",
+        "description": "The name assigned to the application."
+      },
+    {
+      "name": "NAMESPACE",
+      "displayName": "namespace",
+      "required": true,
+      "value": "openshift",
+      "description": "The namespace that image reside."
+    },
+    {
+      "name": "JAVA_OPT",
+      "displayName": "Java OPT for NameServer",
+      "required": true,
+      "value": "-Xms1g -Xmx1g",
+      "description": "Java Memory Setting for NameServer"
+    },
+    {
+      "name": "BROKER_OPT",
+      "displayName": "Java OPT for Broker",
+      "required": true,
+      "value": "-Xms1g -Xmx1g",
+      "description": "Java Memory Setting for NameServer"
+    }
+  ],
+  "objects": [
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+        },
+        "labels": {
+          "component": "${BROKER}",
+          "provider": "custom",
+          "project": "${BROKER}",
+          "version": "rocketmq",
+          "group": "rocketmq"
+        },
+        "name": "${BROKER}"
+      },
+      "spec": {
+        "clusterIP": "None",
+        "deprecatedPublicIPs": [],
+        "ports": [
+          {
+            "name":"9876-tcp",
+            "port": 9876,
+            "protocol": "TCP",
+            "targetPort": 9876
+          },
+          {
+            "name":"10911-tcp",
+            "port": 10911,
+            "protocol": "TCP",
+            "targetPort": 10911
+          },
+          {
+            "name":"10912-tcp",
+            "port": 10912,
+            "protocol": "TCP",
+            "targetPort": 10912
+          }
+        ],
+        "selector": {
+          "project": "${BROKER}",
+          "component": "${BROKER}",
+          "provider": "custom",
+          "group": "rocketmq"
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+        },
+        "labels": {
+          "component": "${NAMESERVER}",
+          "provider": "custom",
+          "project": "${NAMESERVER}",
+          "version": "rocketmq",
+          "group": "rocketmq"
+        },
+        "name": "${NAMESERVER}"
+      },
+      "spec": {
+        "clusterIP": "None",
+        "deprecatedPublicIPs": [],
+        "ports": [
+          {
+            "name":"9876-tcp",
+            "port": 9876,
+            "protocol": "TCP",
+            "targetPort": 9876
+          },
+          {
+            "name":"10911-tcp",
+            "port": 10911,
+            "protocol": "TCP",
+            "targetPort": 10911
+          },
+          {
+            "name":"10912-tcp",
+            "port": 10912,
+            "protocol": "TCP",
+            "targetPort": 10912
+          }
+        ],
+        "selector": {
+          "project": "${NAMESERVER}",
+          "component": "${NAMESERVER}",
+          "provider": "custom",
+          "group": "rocketmq"
+        }
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${NAMESERVER}",
+        "creationTimestamp": null,
+        "labels": {
+          "component": "${NAMESERVER}",
+          "group": "rocketmq",
+          "project": "${NAMESERVER}",
+          "provider": "custom",
+          "version": "latest"
+        }
+      },
+      "spec": {
+        "strategy": {
+          "resources": {}
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          },
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "${NAMESERVER}"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "namespace": "${NAMESPACE}",
+                "name": "${NAMESERVER}:latest"
+              }
+            }
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "component": "${NAMESERVER}",
+          "deploymentconfig": "${NAMESERVER}",
+          "group": "rocketmq",
+          "project": "${NAMESERVER}",
+          "provider": "custom",
+          "version": "latest"
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "component": "${NAMESERVER}",
+              "deploymentconfig": "${NAMESERVER}",
+              "group": "rocketmq",
+              "project": "${NAMESERVER}",
+              "provider": "custom",
+              "version": "latest"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "${NAMESERVER}",
+                "image": "library/${APP_NAME}:latest",
+                "ports": [
+                  {
+                    "containerPort": 9876,
+                    "name": "nameserver"
+                  },
+                  {
+                    "containerPort": 10911,
+                    "name": "broker"
+                  },
+                  {
+                    "containerPort": 10912,
+                    "name": "brokerreplica"
+                  }
+                ],
+                "env" : [ {
+                  "name" : "KUBERNETES_NAMESPACE",
+                  "valueFrom" : {
+                    "fieldRef" : {
+                      "fieldPath" : "metadata.namespace"
+                    }
+                  }
+                } , {
+                  "name": "JAVA_OPT",
+                  "value": "${JAVA_OPT}"
+                }]
+              }
+            ]
+          }
+        }
+      },
+      "status": {}
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${BROKER}",
+        "creationTimestamp": null,
+        "labels": {
+          "component": "${BROKER}",
+          "group": "rocketmq",
+          "project": "${BROKER}",
+          "provider": "custom",
+          "version": "latest"
+        }
+      },
+      "spec": {
+        "strategy": {
+          "resources": {}
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          },
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "${BROKER}"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "namespace": "${NAMESPACE}",
+                "name": "${BROKER}:latest"
+              }
+            }
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "component": "${BROKER}",
+          "deploymentconfig": "${BROKER}",
+          "group": "rocketmq",
+          "project": "${BROKER}",
+          "provider": "custom",
+          "version": "latest"
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "component": "${BROKER}",
+              "deploymentconfig": "${BROKER}",
+              "group": "rocketmq",
+              "project": "${BROKER}",
+              "provider": "custom",
+              "version": "latest"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "${BROKER}",
+                "image": "library/${BROKER}:latest",
+                "ports": [
+                  {
+                    "containerPort": 9876,
+                    "name": "nameserver"
+                  },
+                  {
+                    "containerPort": 10911,
+                    "name": "broker"
+                  },
+                  {
+                    "containerPort": 10912,
+                    "name": "brokerreplica"
+                  }
+                ],
+                "env" : [ {
+                  "name" : "KUBERNETES_NAMESPACE",
+                  "valueFrom" : {
+                    "fieldRef" : {
+                      "fieldPath" : "metadata.namespace"
+                    }
+                  }
+                } , {
+                  "name": "JAVA_OPT",
+                  "value": "${BROKER_OPT}"
+                }, {
+                  "name": "ROCKETMQ_NAMESERVER",
+                  "value": "${NAMESERVER}:9876"
+                }]
+              }
+            ]
+          }
+        }
+      },
+      "status": {}
+    }
+  ]
+}
